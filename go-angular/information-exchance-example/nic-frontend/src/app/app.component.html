@@ -1,0 +1,31 @@
+<h2>Add personal info</h2>
+
+<pre>
+    {{
+      {
+        "name": "John Doe",
+        "age": 30,
+      }
+    }
+  }
+</pre>
+
+<section>
+  <div class="container-fluid h-custom">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+        <!-- Email input -->
+        <div class="formGroup">
+          <input type="text" class="formControl" placeholder="Personal detail name" #personalDetailName required>
+          <input type="text" class="formControl" placeholder="Personal detail value" #personalDetailValue required>
+        </div>
+        <div class="text-center mt-4 pt-2">
+          <button type="submit" color="primary" class="btn btn-primary btn-lg btn-block">
+            Add data
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
