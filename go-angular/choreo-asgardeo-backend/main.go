@@ -94,7 +94,7 @@ func validate(jwtString string) bool {
 	if err != nil {
 		log.Fatalf("Failed to create JWKS from resource at the given URL.\nError: %s", err.Error())
 	}
-
+	jwt.DecodePaddingAllowed = true
 	// Parse the JWT.
 	token, err := jwt.Parse(jwtString, jwks.Keyfunc)
 	if err != nil {
