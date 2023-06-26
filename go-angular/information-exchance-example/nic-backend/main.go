@@ -52,6 +52,9 @@ func AddDataHandler(w http.ResponseWriter, r *http.Request) {
 func ViewDataHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("ViewDataHandler endpoint hit")
 
+	//debug
+	fmt.Println(r.Header.Get("x-jwt-assertion"))
+
 	if validate(r.Header.Get("x-jwt-assertion")) {
 		prop := r.URL.Query().Get("prop")
 		fmt.Println(prop)
