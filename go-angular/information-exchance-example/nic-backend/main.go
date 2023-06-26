@@ -35,24 +35,43 @@ type JSONWebKey struct {
 }
 
 func AddDataHandler(w http.ResponseWriter, r *http.Request) {
-	var newData Data
-	err := json.NewDecoder(r.Body).Decode(&newData)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+
+	//debug
+	fmt.Println("AddDataHandler endpoint hit")
+	fmt.Println(r.Header.Get("x-jwt-assertion"))
+
+	if validate(r.Header.Get("x-jwt-assertion")) {
+		var newData Data
+		err := json.NewDecoder(r.Body).Decode(&newData)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		storage = append(storage, newData)
+
+		w.WriteHeader(http.StatusCreated)
+		json.NewEncoder(w).Encode(newData)
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		response := struct {
+			Message string `json:"message"`
+		}{
+			Message: "Unauthorized access token",
+		}
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			json.NewEncoder(w).Encode(jsonResponse)
+		}
 		return
 	}
-
-	storage = append(storage, newData)
-
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(newData)
 
 }
 
 func ViewDataHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("ViewDataHandler endpoint hit")
 
 	//debug
+	fmt.Println("ViewDataHandler endpoint hit")
 	fmt.Println(r.Header.Get("x-jwt-assertion"))
 
 	if validate(r.Header.Get("x-jwt-assertion")) {
@@ -102,11 +121,13 @@ func validate(jwtString string) bool {
 
 	// Create the JWKS from the resource at the given URL.
 	jwks, err := keyfunc.Get(jwksEndpoint, options)
+
 	if err != nil {
 		log.Fatalf("Failed to create JWKS from resource at the given URL.\nError: %s", err.Error())
 	}
 
 	// Parse the JWT.
+	jwt.DecodePaddingAllowed = true
 	token, err := jwt.Parse(jwtString, jwks.Keyfunc)
 	if err != nil {
 		log.Fatalf("Failed to parse the JWT.\nError: %s", err.Error())
