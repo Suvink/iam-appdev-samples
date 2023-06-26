@@ -1,11 +1,15 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
+	"github.com/MicahParks/keyfunc"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/mux"
 )
 
@@ -14,7 +18,21 @@ type Data struct {
 	Value string `json:"value"`
 }
 
+var jwksEndpoint string = "https://gateway.e1-us-east-azure.choreoapis.dev/.wellknown/jwks"
+
 var storage []Data
+
+type JWKS struct {
+	Keys []JSONWebKey `json:"keys"`
+}
+
+type JSONWebKey struct {
+	Kty string `json:"kty"`
+	N   string `json:"n"`
+	E   string `json:"e"`
+	Kid string `json:"kid"`
+	Use string `json:"use"`
+}
 
 func AddDataHandler(w http.ResponseWriter, r *http.Request) {
 	var newData Data
@@ -32,20 +50,77 @@ func AddDataHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func ViewDataHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("ViewDataHandler")
-	prop := r.URL.Query().Get("prop")
-	fmt.Println(prop)
-	if prop != "" {
-		for _, data := range storage {
-			if data.Prop == prop {
-				json.NewEncoder(w).Encode(data)
-				return
-			}
-		}
+	fmt.Println("ViewDataHandler endpoint hit")
 
+	if validate(r.Header.Get("x-jwt-assertion")) {
+		prop := r.URL.Query().Get("prop")
+		fmt.Println(prop)
+		if prop != "" {
+			for _, data := range storage {
+				if data.Prop == prop {
+					json.NewEncoder(w).Encode(data)
+					return
+				}
+			}
+
+		} else {
+			json.NewEncoder(w).Encode(storage)
+		}
 	} else {
-		json.NewEncoder(w).Encode(storage)
+		w.WriteHeader(http.StatusUnauthorized)
+		response := struct {
+			Message string `json:"message"`
+		}{
+			Message: "Unauthorized access token",
+		}
+		jsonResponse, err := json.Marshal(response)
+		if err != nil {
+			json.NewEncoder(w).Encode(jsonResponse)
+		}
+		return
 	}
+
+}
+
+func validate(jwtString string) bool {
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	options := keyfunc.Options{
+		Ctx: ctx,
+		RefreshErrorHandler: func(err error) {
+			log.Printf("There was an error with the jwt.Keyfunc\nError: %s", err.Error())
+		},
+		RefreshInterval:   time.Hour,
+		RefreshRateLimit:  time.Minute * 5,
+		RefreshTimeout:    time.Second * 10,
+		RefreshUnknownKID: true,
+	}
+
+	// Create the JWKS from the resource at the given URL.
+	jwks, err := keyfunc.Get(jwksEndpoint, options)
+	if err != nil {
+		log.Fatalf("Failed to create JWKS from resource at the given URL.\nError: %s", err.Error())
+	}
+
+	// Parse the JWT.
+	token, err := jwt.Parse(jwtString, jwks.Keyfunc)
+	if err != nil {
+		log.Fatalf("Failed to parse the JWT.\nError: %s", err.Error())
+	}
+
+	// Check if the token is valid.
+	if !token.Valid {
+		log.Println("The token is not valid.")
+		cancel()
+		jwks.EndBackground()
+		return false
+	}
+
+	log.Println("The token is valid.")
+	cancel()
+	jwks.EndBackground()
+	return true
 }
 
 func main() {
