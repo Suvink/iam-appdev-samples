@@ -1,0 +1,43 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: NIC API
+paths:
+  /data:
+    post:
+      summary: Add data
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: data
+          schema:
+            $ref: '#/definitions/Data'
+      responses:
+        '201':
+          description: Created
+          schema:
+            $ref: '#/definitions/Data'
+    get:
+      summary: View data
+      parameters:
+        - in: query
+          name: prop
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/Data'
+        '404':
+          description: Not Found
+  definitions:
+    Data:
+      type: object
+      properties:
+        prop:
+          type: string
+        value:
+          type: string
