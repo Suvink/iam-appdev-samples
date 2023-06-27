@@ -234,6 +234,7 @@ func ProcessToken(w http.ResponseWriter, r *http.Request) {
 			SameSite: http.SameSiteNoneMode,
 			Domain:   "http://localhost:4200",
 			MaxAge:   90000,
+			Secure:   true,
 		}
 		http.SetCookie(w, &cookie)
 
