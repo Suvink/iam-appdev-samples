@@ -1,43 +1,78 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-  version: 1.0.0
-  title: NIC API
+  title: "API"
+  description: "API documentation"
+  version: "1.0.0"
+schemes:
+  - "http"
 paths:
   /data:
     post:
-      summary: Add data
+      summary: "Add data"
       consumes:
-        - application/json
-      parameters:
-        - in: body
-          name: data
-          schema:
-            $ref: '#/definitions/Data'
+        - "application/json"
+      produces:
+        - "application/json"
       responses:
-        '201':
-          description: Created
+        "201":
+          description: "Created"
           schema:
-            $ref: '#/definitions/Data'
+            $ref: "#/definitions/Data"
+      security:
+        - bearerAuth: []
     get:
-      summary: View data
+      summary: "View data"
+      produces:
+        - "application/json"
       parameters:
-        - in: query
-          name: prop
-          type: string
+        - name: "prop"
+          in: "query"
+          description: "Filter data by property"
+          type: "string"
       responses:
-        '200':
-          description: OK
+        "200":
+          description: "OK"
           schema:
-            type: array
+            type: "array"
             items:
-              $ref: '#/definitions/Data'
-        '404':
-          description: Not Found
-  definitions:
-    Data:
-      type: object
-      properties:
-        prop:
-          type: string
-        value:
-          type: string
+              $ref: "#/definitions/Data"
+      security:
+        - bearerAuth: []
+  /authorize:
+    get:
+      summary: "Authorize"
+      responses:
+        "302":
+          description: "Found"
+  /processToken:
+    get:
+      summary: "Process token"
+      parameters:
+        - name: "code"
+          in: "query"
+          description: "Authorization code"
+          type: "string"
+      responses:
+        "200":
+          description: "OK"
+          schema:
+            type: "string"
+        "400":
+          description: "Bad Request"
+definitions:
+  Data:
+    type: "object"
+    properties:
+      prop:
+        type: "string"
+      value:
+        type: "string"
+  TokenResponse:
+    type: "object"
+    properties:
+      access_token:
+        type: "string"
+      refresh_token:
+        type: "string"
+      expires_in:
+        type: "integer"
