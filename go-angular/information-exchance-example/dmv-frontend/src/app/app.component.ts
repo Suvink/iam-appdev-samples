@@ -49,7 +49,7 @@ export class AppComponent implements OnInit {
         this.nicData = data;
       })
     } else {
-      this.appService.getAuthorization().pipe().subscribe();
+      this.appService.getAuthorization();
     }
   }
 

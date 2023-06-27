@@ -17,7 +17,7 @@ export class AppService {
         .set('Authorization', `Bearer ${this.nicAccessToken}`);
 
     getAuthorization() {
-        return this.http.get(NG_APP_API_URL + '/authorize',);
+        return window.location.href = NG_APP_API_URL + '/authorize';
     }
 
     getNIC() {

@@ -230,7 +230,8 @@ func ProcessToken(w http.ResponseWriter, r *http.Request) {
 			Name:     "nic-api-nic-service-auth",
 			Value:    tokenResponse.AccessToken,
 			Path:     "/",
-			HttpOnly: false,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
 		}
 		http.SetCookie(w, &cookie)
 
