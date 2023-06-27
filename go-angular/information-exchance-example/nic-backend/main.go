@@ -231,7 +231,7 @@ func ProcessToken(w http.ResponseWriter, r *http.Request) {
 			Value:    tokenResponse.AccessToken,
 			Path:     "/",
 			HttpOnly: false,
-			SameSite: http.SameSiteLaxMode,
+			SameSite: http.SameSiteNoneMode,
 			Domain:   "http://localhost:4200",
 			MaxAge:   90000,
 		}
