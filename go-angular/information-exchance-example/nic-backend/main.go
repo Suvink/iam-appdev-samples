@@ -38,7 +38,7 @@ type TokenResponse struct {
 }
 
 var jwksEndpoint string = "https://gateway.e1-us-east-azure.choreoapis.dev/.wellknown/jwks"
-var endpointBaseURL string = "https://62b887b7-3196-4e81-b161-125bafac2fc7-dev.e1-us-east-azure.choreoapis.dev/uixy/nic-api/nic-service-be2/1.0.0"
+var endpointBaseURL string = "https://62b887b7-3196-4e81-b161-125bafac2fc7-prod.e1-us-east-azure.choreoapis.dev/uixy/nic-api/nic-service-be2/1.0.0"
 var tokenEndpoint string = "https://api.asgardeo.io/t/iamapptesting/oauth2/token"
 var clientAppURL string = "http://localhost:4200"
 
