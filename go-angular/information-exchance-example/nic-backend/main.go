@@ -40,7 +40,7 @@ type TokenResponse struct {
 var jwksEndpoint string = "https://gateway.e1-us-east-azure.choreoapis.dev/.wellknown/jwks"
 var endpointBaseURL string = "https://62b887b7-3196-4e81-b161-125bafac2fc7-prod.e1-us-east-azure.choreoapis.dev/uixy/nic-api/nic-service-be2/1.0.0"
 var tokenEndpoint string = "https://api.asgardeo.io/t/iamapptesting/oauth2/token"
-var clientAppURL string = "http://localhost:4200"
+var clientAppURL string = "httsp://localhost:4200"
 
 var storage []Data
 
@@ -239,7 +239,7 @@ func ProcessToken(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &cookie)
 
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:4200")
+		w.Header().Set("Access-Control-Allow-Origin", "https://localhost:4200")
 
 		http.Redirect(w, r, clientAppURL+"?consent_status=success", http.StatusFound)
 
