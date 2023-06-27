@@ -21,7 +21,7 @@ export class AppService {
     }
 
     getNIC() {
-        return this.http.get(NG_APP_API_URL + '/data', { 'headers': this.headers, withCredentials: true });
+        return this.http.get(NG_APP_API_URL + '/data', { 'headers': this.headers });
     }
 
 }

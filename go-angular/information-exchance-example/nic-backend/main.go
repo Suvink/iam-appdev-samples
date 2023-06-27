@@ -232,7 +232,7 @@ func ProcessToken(w http.ResponseWriter, r *http.Request) {
 			Path:     "/",
 			HttpOnly: false,
 			SameSite: http.SameSiteNoneMode,
-			Domain:   "http://localhost:4200",
+			Domain:   "localhost",
 			MaxAge:   90000,
 			Secure:   true,
 		}
