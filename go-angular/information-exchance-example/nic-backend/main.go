@@ -232,7 +232,7 @@ func ProcessToken(w http.ResponseWriter, r *http.Request) {
 			Path:     "/",
 			HttpOnly: false,
 			SameSite: http.SameSiteLaxMode,
-			Domain:   endpointBaseURL,
+			Domain:   "http://localhost:4200",
 			MaxAge:   90000,
 		}
 		http.SetCookie(w, &cookie)
