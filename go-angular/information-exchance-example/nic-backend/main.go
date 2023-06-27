@@ -1,12 +1,15 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"time"
 
 	"github.com/MicahParks/keyfunc"
@@ -112,9 +115,7 @@ func AuthorizeHandler(w http.ResponseWriter, r *http.Request) {
 	//debug
 	fmt.Println("AuthorizeHandler endpoint hit")
 
-	redirectURL := r.URL.Query().Get("redirectUrl")
-
-	var authURL = getAuthorizationURL(redirectURL)
+	var authURL = getAuthorizationURL()
 	http.Redirect(w, r, authURL, http.StatusFound)
 	return
 
@@ -163,12 +164,12 @@ func validate(jwtString string) bool {
 	return true
 }
 
-func getAuthorizationURL(redirectURL string) string {
+func getAuthorizationURL() string {
 
 	var authConfig = AuthorizationURLParams{
 		org:               "iamapptesting",
 		clientID:          "6D98HOjAtBY5cIxbEosJJ8XX_Hsa",
-		SignInRedirectURL: redirectURL,
+		SignInRedirectURL: "https://62b887b7-3196-4e81-b161-125bafac2fc7-dev.e1-us-east-azure.choreoapis.dev/uixy/nic-api/nic-service-be2/1.0.0/processToken",
 		EnablePKCE:        true,
 		ResponseMode:      "code",
 		Scope:             "openid email groups profile urn:iamapptesting:nicapinicservicebe2:read_data",
@@ -184,12 +185,87 @@ func getAuthorizationURL(redirectURL string) string {
 		`&scope=` + url.QueryEscape(authConfig.Scope)
 }
 
+func ProcessToken(w http.ResponseWriter, r *http.Request) {
+	oidc_auth_code := r.URL.Query().Get("code")
+	fmt.Println(oidc_auth_code)
+
+	if oidc_auth_code != "" {
+
+		clientSecret := os.Getenv("CLIENT_SECRET")
+
+		// Create JSON data
+		jsonData := map[string]interface{}{
+			"code":          oidc_auth_code,
+			"grant_type":    "authorization_code",
+			"client_id":     "6D98HOjAtBY5cIxbEosJJ8XX_Hsa",
+			"client_secret": clientSecret,
+			"redirect_uri":  "https://62b887b7-3196-4e81-b161-125bafac2fc7-dev.e1-us-east-azure.choreoapis.dev/uixy/nic-api/nic-service-be2/1.0.0/processToken",
+		}
+
+		// Convert JSON data to byte slice
+		jsonBytes, err := json.Marshal(jsonData)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
+		// Create request body as a byte buffer
+		reqBody := bytes.NewBuffer(jsonBytes)
+
+		fmt.Println(reqBody)
+
+		// Make POST request
+		resp, err :=
+			http.Post("https://api.asgardeo.io/t/iamapptesting/oauth2/token",
+				"application/json", reqBody)
+
+		fmt.Println(resp)
+
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+
+		// Parse JSON response
+		var tokenResponse TokenResponse
+		err = json.Unmarshal(body, &tokenResponse)
+		if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		fmt.Println("Token Response", tokenResponse)
+		w.Write([]byte(tokenResponse.AccessToken))
+
+	} else {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			http.Error(w, "Error reading request body",
+				http.StatusBadRequest)
+			return
+		}
+
+		defer r.Body.Close()
+
+		fmt.Println(string(body))
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Token processed successfully"))
+	}
+
+}
+
 func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/data", AddDataHandler).Methods("POST")
 	router.HandleFunc("/data", ViewDataHandler).Methods("GET")
 	router.HandleFunc("/authorize", AuthorizeHandler).Methods("GET")
+	router.HandleFunc("/processToken", ProcessToken).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
