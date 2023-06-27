@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/MicahParks/keyfunc"
@@ -16,6 +17,22 @@ import (
 type Data struct {
 	Prop  string `json:"prop"`
 	Value string `json:"value"`
+}
+type AuthorizationURLParams struct {
+	org               string
+	clientID          string
+	SignInRedirectURL string
+	EnablePKCE        bool
+	ResponseMode      string
+	Scope             string
+	AdditionalParams  map[string]interface{}
+}
+
+type TokenResponse struct {
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
+	ExpiresIn    int    `json:"expires_in"`
+	// Add more fields as needed
 }
 
 var jwksEndpoint string = "https://gateway.e1-us-east-azure.choreoapis.dev/.wellknown/jwks"
@@ -74,33 +91,32 @@ func ViewDataHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("ViewDataHandler endpoint hit")
 	fmt.Println(r.Header.Get("x-jwt-assertion"))
 
-	if validate(r.Header.Get("x-jwt-assertion")) {
-		prop := r.URL.Query().Get("prop")
-		fmt.Println(prop)
-		if prop != "" {
-			for _, data := range storage {
-				if data.Prop == prop {
-					json.NewEncoder(w).Encode(data)
-					return
-				}
+	prop := r.URL.Query().Get("prop")
+	fmt.Println(prop)
+	if prop != "" {
+		for _, data := range storage {
+			if data.Prop == prop {
+				json.NewEncoder(w).Encode(data)
+				return
 			}
+		}
 
-		} else {
-			json.NewEncoder(w).Encode(storage)
-		}
 	} else {
-		w.WriteHeader(http.StatusUnauthorized)
-		response := struct {
-			Message string `json:"message"`
-		}{
-			Message: "Unauthorized access token",
-		}
-		jsonResponse, err := json.Marshal(response)
-		if err != nil {
-			json.NewEncoder(w).Encode(jsonResponse)
-		}
-		return
+		json.NewEncoder(w).Encode(storage)
 	}
+
+}
+
+func AuthorizeHandler(w http.ResponseWriter, r *http.Request) {
+
+	//debug
+	fmt.Println("AuthorizeHandler endpoint hit")
+
+	redirectURL := r.URL.Query().Get("redirectUrl")
+
+	var authURL = getAuthorizationURL(redirectURL)
+	http.Redirect(w, r, authURL, http.StatusFound)
+	return
 
 }
 
@@ -147,11 +163,33 @@ func validate(jwtString string) bool {
 	return true
 }
 
+func getAuthorizationURL(redirectURL string) string {
+
+	var authConfig = AuthorizationURLParams{
+		org:               "iamapptesting",
+		clientID:          "6D98HOjAtBY5cIxbEosJJ8XX_Hsa",
+		SignInRedirectURL: redirectURL,
+		EnablePKCE:        true,
+		ResponseMode:      "code",
+		Scope:             "openid email groups profile urn:iamapptesting:nicapinicservicebe2:read_data",
+		AdditionalParams:  nil,
+	}
+
+	return `https://api.asgardeo.io/t/` +
+		authConfig.org +
+		`/oauth2/authorize?client_id=` +
+		authConfig.clientID +
+		`&redirect_uri=` + url.QueryEscape(authConfig.SignInRedirectURL) +
+		`&response_type=` + authConfig.ResponseMode +
+		`&scope=` + url.QueryEscape(authConfig.Scope)
+}
+
 func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/data", AddDataHandler).Methods("POST")
 	router.HandleFunc("/data", ViewDataHandler).Methods("GET")
+	router.HandleFunc("/authorize", AuthorizeHandler).Methods("GET")
 
 	log.Fatal(http.ListenAndServe(":8000", router))
 }
