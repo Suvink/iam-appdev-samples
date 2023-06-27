@@ -238,6 +238,9 @@ func ProcessToken(w http.ResponseWriter, r *http.Request) {
 		}
 		http.SetCookie(w, &cookie)
 
+		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:4200")
+
 		http.Redirect(w, r, clientAppURL+"?consent_status=success", http.StatusFound)
 
 	} else {
