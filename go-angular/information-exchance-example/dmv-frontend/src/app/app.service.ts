@@ -1,22 +1,27 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NG_APP_API_URL } from './environment/environment';
+import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class AppService {
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private cookieService: CookieService) { }
 
-    rootURL = NG_APP_API_URL;
+    nicAccessToken = this.cookieService.get('nic-api-nic-service-auth');
 
     headers = new HttpHeaders()
         .set('content-type', 'application/json')
-        .set('Authorization', `Bearer ${localStorage.getItem('access_token')}`);
+        .set('Authorization', `Bearer ${this.nicAccessToken}`);
+
+    getAuthorization() {
+        return this.http.get(NG_APP_API_URL + '/authorize',);
+    }
 
     getNIC() {
-        return this.http.get("http://localhost:8000" + '/authorize?redirectUrl=http://localhost:4200/token',);
+        return this.http.get(NG_APP_API_URL + '/data', { 'headers': this.headers });
     }
 
 }
