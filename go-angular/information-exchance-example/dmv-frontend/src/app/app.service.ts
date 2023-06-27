@@ -14,7 +14,7 @@ export class AppService {
 
     headers = new HttpHeaders()
         .set('content-type', 'application/json')
-        .set('Authorization', `Bearer ${this.nicAccessToken}`);
+        .set('Authorization', `Bearer ${localStorage.getItem('access_token')}`);
 
     getAuthorization() {
         return window.location.href = NG_APP_API_URL + '/authorize';

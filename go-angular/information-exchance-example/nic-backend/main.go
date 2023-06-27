@@ -239,8 +239,7 @@ func ProcessToken(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Origin", "https://localhost:4200")
-
-		http.Redirect(w, r, clientAppURL+"?consent_status=success", http.StatusFound)
+		http.Redirect(w, r, clientAppURL+"?consent_status="+tokenResponse.AccessToken, http.StatusFound)
 
 	} else {
 		body, err := ioutil.ReadAll(r.Body)

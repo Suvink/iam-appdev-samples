@@ -44,7 +44,8 @@ export class AppComponent implements OnInit {
   }
 
   fetchNIC() {
-    if (this.urlParams['consent_status'] === 'success') {
+    if (this.urlParams['consent_status'].contains("ey")) {
+      localStorage.setItem('access_token', this.urlParams['consent_status'])
       this.appService.getNIC().pipe().subscribe((data: any) => {
         this.nicData = data;
       })
