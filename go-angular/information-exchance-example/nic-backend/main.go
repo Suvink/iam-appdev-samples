@@ -166,7 +166,10 @@ func validate(jwtString string) bool {
 	return true
 }
 
-func getAuthorizationURL() string {
+func getAuthorizationURL(w http.ResponseWriter, r *http.Request) string {
+	requestedParam := r.URL.Query().Get("requested_param")
+	requestedAccessLevel := r.URL.Query().Get("requested_access_level")
+	requestedPermission := requestedAccessLevel + "_" + requestedParam
 
 	var authConfig = AuthorizationURLParams{
 		org:               "iamapptesting",
@@ -175,7 +178,9 @@ func getAuthorizationURL() string {
 		EnablePKCE:        true,
 		ResponseMode:      "code",
 		Scope:             "openid email groups profile urn:iamapptesting:nicapinicservicebe2:read_data",
-		AdditionalParams:  nil,
+		AdditionalParams: map[string]interface{}{
+			"requested_perm": requestedPermission,
+		},
 	}
 
 	return `https://api.asgardeo.io/t/` +

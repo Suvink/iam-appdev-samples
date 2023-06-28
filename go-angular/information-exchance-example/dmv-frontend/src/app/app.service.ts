@@ -20,8 +20,10 @@ export class AppService {
         return window.location.href = NG_APP_API_URL + '/authorize';
     }
 
-    getNIC() {
-        return this.http.get(NG_APP_API_URL + '/data', { 'headers': this.headers });
+    getNIC(token: string) {
+        return this.http.get(NG_APP_API_URL + '/data', { 'headers': new HttpHeaders()
+        .set('content-type', 'application/json')
+        .set('Authorization', `Bearer ${token}`) });
     }
 
 }
