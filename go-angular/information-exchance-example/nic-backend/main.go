@@ -114,10 +114,13 @@ func ViewDataHandler(w http.ResponseWriter, r *http.Request) {
 
 func AuthorizeHandler(w http.ResponseWriter, r *http.Request) {
 
+	requestedParam := r.URL.Query().Get("requested_param")
+	requestedAccessLevel := r.URL.Query().Get("requested_access_level")
+
 	//debug
 	fmt.Println("AuthorizeHandler endpoint hit")
 
-	var authURL = getAuthorizationURL()
+	var authURL = getAuthorizationURL(requestedParam, requestedAccessLevel)
 	http.Redirect(w, r, authURL, http.StatusFound)
 	return
 
@@ -166,10 +169,8 @@ func validate(jwtString string) bool {
 	return true
 }
 
-func getAuthorizationURL(w http.ResponseWriter, r *http.Request) string {
-	requestedParam := r.URL.Query().Get("requested_param")
-	requestedAccessLevel := r.URL.Query().Get("requested_access_level")
-	requestedPermission := requestedAccessLevel + "_" + requestedParam
+func getAuthorizationURL(param string, accessLevel string) string {
+	requestedPermission := accessLevel + "_" + param
 
 	var authConfig = AuthorizationURLParams{
 		org:               "iamapptesting",
