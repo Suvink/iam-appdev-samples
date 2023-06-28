@@ -170,7 +170,6 @@ func validate(jwtString string) bool {
 }
 
 func getAuthorizationURL(param string, accessLevel string) string {
-	requestedPermission := accessLevel + "_" + param
 
 	var authConfig = AuthorizationURLParams{
 		org:               "iamapptesting",
@@ -180,7 +179,8 @@ func getAuthorizationURL(param string, accessLevel string) string {
 		ResponseMode:      "code",
 		Scope:             "openid email groups profile urn:iamapptesting:nicapinicservicebe2:read_data",
 		AdditionalParams: map[string]interface{}{
-			"requested_perm": requestedPermission,
+			"requested_param":        param,
+			"requested_access_level": accessLevel,
 		},
 	}
 
@@ -190,7 +190,9 @@ func getAuthorizationURL(param string, accessLevel string) string {
 		authConfig.clientID +
 		`&redirect_uri=` + url.QueryEscape(authConfig.SignInRedirectURL) +
 		`&response_type=` + authConfig.ResponseMode +
-		`&scope=` + url.QueryEscape(authConfig.Scope)
+		`&scope=` + url.QueryEscape(authConfig.Scope) +
+		`&requested_param=` + url.QueryEscape(authConfig.AdditionalParams["requested_param"].(string)) +
+		`&requested_access_level=` + url.QueryEscape(authConfig.AdditionalParams["requested_access_level"].(string))
 }
 
 func ProcessToken(w http.ResponseWriter, r *http.Request) {

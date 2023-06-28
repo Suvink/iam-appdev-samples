@@ -17,7 +17,7 @@ export class AppService {
         .set('Authorization', `Bearer ${localStorage.getItem('access_token')}`);
 
     getAuthorization() {
-        return window.location.href = NG_APP_API_URL + '/authorize';
+        return window.location.href = NG_APP_API_URL + '/authorize?requested_param=nic&requested_access_level=view';
     }
 
     getNIC(token: string) {
