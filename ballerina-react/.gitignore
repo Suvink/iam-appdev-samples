@@ -1,0 +1,8 @@
+.idea
+.vscode
+
+/node_modules
+
+task-mgt-service/target
+generated
+Config.toml

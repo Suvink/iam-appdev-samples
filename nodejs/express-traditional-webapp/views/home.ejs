@@ -1,0 +1,59 @@
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="referrer" content="no-referrer" />
+
+    <title>Asgardeo-ExpressJS Sample Application</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body>
+    <div id="root">
+        <div>
+            <div class="title">
+            </div>
+            <div class="content">
+                <% if (authenticateResponse.applicationRoles.includes('Admin')) { %>
+                   <button class="btn-custom" onclick="addProduct()">Add Products</button>
+                <% } %>
+                <button class="btn-custom" onclick="viewProducts()">View Products</button>
+                <form action="logout" method="get">
+                    <button type="submit">Log Out</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</body>
+<script>
+    var backendApiUrl = "<%=backendApiUrl%>";
+    function addProduct() {
+        axios.post('/products', {
+            id: 1,
+            name: 'test',
+            description: 'test',
+            price: 100
+        }, { withCredentials: true })
+        .then((response) => {
+            console.log(response);
+            alert("Response : " + JSON.stringify(response.data));
+            }, (error) => {
+            console.log(error);
+            });
+    }
+
+    function viewProducts() {
+        axios.get('/products', { withCredentials: true })
+        .then((response) => {
+            console.log(response);
+            alert("Response : " + JSON.stringify(response.data));
+            }, (error) => {
+            console.log(error);
+            });
+        }
+</script>
+
+</html>

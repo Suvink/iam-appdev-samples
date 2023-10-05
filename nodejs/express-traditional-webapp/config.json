@@ -1,0 +1,10 @@
+{
+  "clientID": "vrfJ_cTNJussHx_n9qkUmj4spKAa",
+  "clientSecret": "V0623RgDJ0q1v20skCkjnSQHfOQa",
+  "baseUrl": "https://api.asgardeo.io/t/charithr",
+  "appURL": "http://localhost:3000",
+  "scope": ["openid", "profile", "groups", "app_roles", "urn:charithr:expressbackendproductcata:add_product", "urn:charithr:expressbackendproductcata:delete_product", "urn:charithr:expressbackendproductcata:get_product"],
+  "cookieConfig": {
+    "maxAge": 3600000
+  }
+}
